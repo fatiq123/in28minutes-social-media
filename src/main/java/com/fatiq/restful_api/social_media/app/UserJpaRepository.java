@@ -1,5 +1,9 @@
 package com.fatiq.restful_api.social_media.app;
 
-public interface UserJpaRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.fatiq.restful_api.social_media.entity.User;
+
+public interface UserJpaRepository extends JpaRepository<User, Integer>{
 
 }
