@@ -30,12 +30,14 @@ public class UserJpaService {
 	@Autowired
 	private UserJpaRepository repository;
 
+	@Autowired
+	private PostJpaRepository postJpaRepository;
+
 	public UserJpaService(UserJpaRepository repository) {
 		super();
 		this.repository = repository;
 	}
 
-	// GET /users
 	@GetMapping("/jpa/users")
 	public List<User> getUsers() {
 		return repository.findAll();
@@ -48,11 +50,11 @@ public class UserJpaService {
 		if (user.isEmpty())
 			throw new UserNotFoundException("id: " + id);
 
-		EntityModel<User> entityModel = EntityModel.of(user.get()); 
-		
+		EntityModel<User> entityModel = EntityModel.of(user.get());
+
 		WebMvcLinkBuilder link = linkTo(methodOn(this.getClass()).getUsers());
 		entityModel.add(link.withRel("all-users"));
-		
+
 		return entityModel;
 	}
 
@@ -60,6 +62,17 @@ public class UserJpaService {
 	@DeleteMapping("/jpa/users/{id}")
 	public void deleteUserById(@PathVariable int id) {
 		repository.deleteById(id);
+	}
+
+	@GetMapping("/jpa/users/{id}/posts")
+	public List<Post> retrievePostsForUser(@PathVariable int id) {
+
+		Optional<User> user = repository.findById(id);
+
+		if (user.isEmpty())
+			throw new UserNotFoundException("id: " + id);
+
+		return user.get().getPosts();
 	}
 
 	// POST
@@ -71,5 +84,24 @@ public class UserJpaService {
 		return ResponseEntity.created(location).build();
 	}
 
-	
+	@PostMapping("/jpa/users/{id}/posts")
+	public ResponseEntity<Object> createPostForUser(@PathVariable int id, @Valid @RequestBody Post post) {
+
+		Optional<User> user = repository.findById(id);
+
+		if (user.isEmpty())
+			throw new UserNotFoundException("id: " + id);
+
+		post.setUser(user.get());
+
+		postJpaRepository.save(post);
+
+		Post savedPost = postJpaRepository.save(post);
+
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedPost.getId())
+				.toUri();
+		return ResponseEntity.created(location).build();
+
+	}
+
 }

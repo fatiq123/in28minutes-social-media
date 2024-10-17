@@ -1,15 +1,18 @@
 package com.fatiq.restful_api.social_media.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fatiq.restful_api.social_media.app.Post;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 
 //@Entity(name = "user_details")
@@ -22,6 +25,11 @@ public class User {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	
+	@OneToMany(mappedBy = "user")
+	@JsonIgnore
+	private List<Post> posts;  // a user can have multiple posts
+
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,6 +72,15 @@ public class User {
 
 	public void setLocalDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
+	}
+	
+
+	public List<Post> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(List<Post> posts) {
+		this.posts = posts;
 	}
 
 	@Override
